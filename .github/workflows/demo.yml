@@ -1,0 +1,13 @@
+name: demo
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  demo:
+    uses: tiawl-lab/demo/.github/workflows/common.yml@main
+    with:
+      playbook_tag: "demo"
+      gh_token: "${{ vars.BOT_GITHUB_TOKEN }}"

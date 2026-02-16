@@ -1,0 +1,136 @@
+---
+
+- hosts: 127.0.0.1
+  connection: local
+  roles:
+    - secrets/init
+  tags:
+    - secrets-add
+    - secrets-copy
+    - secrets-del
+    - secrets-edit
+    - secrets-export
+    - secrets-gen
+    - secrets-git
+    - secrets-move
+    - secrets-reencrypt
+    - secrets-rotate
+  vars:
+    secrets_init_gpg_private_key: "{{ tldemo_secrets_init_gpg_private_key }}"
+    secrets_init_gpg_public_key: "{{ tldemo_secrets_init_gpg_public_key }}"
+    secrets_user: "{{ tldemo_secrets_user }}"
+    secrets_token: "{{ tldemo_secrets_token }}"
+    secrets_cwd: "{{ tldemo_secrets_cwd }}"
+
+- hosts: 127.0.0.1
+  connection: local
+  roles:
+    - demo
+  tags:
+    - demo
+
+- hosts: 127.0.0.1
+  connection: local
+  roles:
+    - secrets/add
+  tags:
+    - secrets-add
+  vars:
+    secrets_add_path: "{{ tldemo_secrets_add_path }}"
+    secrets_add_password: "{{ tldemo_secrets_add_password }}"
+    secrets_cwd: "{{ tldemo_secrets_cwd }}"
+
+- hosts: 127.0.0.1
+  connection: local
+  roles:
+    - secrets/copy
+  tags:
+    - secrets-copy
+  vars:
+    secrets_copy_oldpath: "{{ tldemo_secrets_copy_oldpath }}"
+    secrets_copy_newpath: "{{ tldemo_secrets_copy_newpath }}"
+    secrets_cwd: "{{ tldemo_secrets_cwd }}"
+
+- hosts: 127.0.0.1
+  connection: local
+  roles:
+    - secrets/del
+  tags:
+    - secrets-del
+  vars:
+    secrets_del_path: "{{ tldemo_secrets_del_path }}"
+    secrets_cwd: "{{ tldemo_secrets_cwd }}"
+
+- hosts: 127.0.0.1
+  connection: local
+  roles:
+    - secrets/edit
+  tags:
+    - secrets-edit
+  vars:
+    secrets_edit_path: "{{ tldemo_secrets_edit_path }}"
+    secrets_edit_password: "{{ tldemo_secrets_edit_password }}"
+    secrets_cwd: "{{ tldemo_secrets_cwd }}"
+
+- hosts: 127.0.0.1
+  connection: local
+  roles:
+    - secrets/export
+  tags:
+    - secrets-export
+  vars:
+    secrets_export_confirm: "{{ tldemo_secrets_export_confirm }}"
+    secrets_cwd: "{{ tldemo_secrets_cwd }}"
+
+- hosts: 127.0.0.1
+  connection: local
+  roles:
+    - secrets/gen
+  tags:
+    - secrets-gen
+  vars:
+    secrets_gen_path: "{{ tldemo_secrets_gen_path }}"
+    secrets_gen_len: "{{ tldemo_secrets_gen_len }}"
+    secrets_cwd: "{{ tldemo_secrets_cwd }}"
+
+- hosts: 127.0.0.1
+  connection: local
+  roles:
+    - secrets/git
+  tags:
+    - secrets-git
+  vars:
+    secrets_git_cmdargs: "{{ tldemo_secrets_git_cmdargs }}"
+    secrets_git_push: "{{ tldemo_secrets_git_push }}"
+    secrets_cwd: "{{ tldemo_secrets_cwd }}"
+
+- hosts: 127.0.0.1
+  connection: local
+  roles:
+    - secrets/move
+  tags:
+    - secrets-move
+  vars:
+    secrets_move_oldpath: "{{ tldemo_secrets_move_oldpath }}"
+    secrets_move_newpath: "{{ tldemo_secrets_move_newpath }}"
+    secrets_cwd: "{{ tldemo_secrets_cwd }}"
+
+- hosts: 127.0.0.1
+  connection: local
+  roles:
+    - secrets/reencrypt
+  tags:
+    - secrets-reencrypt
+  vars:
+    secrets_user: "{{ tldemo_secrets_user }}"
+    secrets_token: "{{ tldemo_secrets_token }}"
+    secrets_cwd: "{{ tldemo_secrets_cwd }}"
+
+- hosts: 127.0.0.1
+  connection: local
+  roles:
+    - secrets/rotate
+  tags:
+    - secrets-rotate
+  vars:
+    secrets_cwd: "{{ tldemo_secrets_cwd }}"

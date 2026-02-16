@@ -1,0 +1,48 @@
+name: tests
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  reset:
+    uses: tiawl-lab/demo/.github/workflows/reset.yml@main
+  test-secrets-gen-1:
+    needs:
+      - reset
+    uses: tiawl-lab/demo/.github/workflows/common.yml@main
+    with:
+      playbook_tag: "secrets-gen"
+      playbook_extravar_secrets_gen_path: "test"
+      playbook_extravar_secrets_gen_len: "24"
+      gh_token: "${{ vars.BOT_GITHUB_TOKEN }}"
+  test-secrets-gen-2:
+    needs:
+      - reset
+      - test-secrets-gen-1
+    uses: tiawl-lab/demo/.github/workflows/common.yml@main
+    with:
+      playbook_tag: "secrets-gen"
+      playbook_extravar_secrets_gen_path: "test2"
+      playbook_extravar_secrets_gen_len: "24"
+      gh_token: "${{ vars.BOT_GITHUB_TOKEN }}"
+  test-secrets-reencrypt-1:
+    needs:
+      - reset
+      - test-secrets-gen-1
+      - test-secrets-gen-2
+    uses: tiawl-lab/demo/.github/workflows/common.yml@main
+    with:
+      playbook_tag: "secrets-reencrypt"
+      gh_token: "${{ vars.BOT_GITHUB_TOKEN }}"
+  test-secrets-reencrypt-2:
+    needs:
+      - reset
+      - test-secrets-gen-1
+      - test-secrets-gen-2
+      - test-secrets-reencrypt-1
+    uses: tiawl-lab/demo/.github/workflows/common.yml@main
+    with:
+      playbook_tag: "secrets-reencrypt"
+      gh_token: "${{ vars.BOT_GITHUB_TOKEN }}"
