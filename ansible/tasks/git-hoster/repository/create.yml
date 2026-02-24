@@ -1,0 +1,16 @@
+---
+
+- ansible.builtin.uri:
+    url: "https://{{ githoster_api }}/orgs/{{ repo_owner }}/repos"
+    method: "POST"
+    body:
+      name: "{{ repo_name }}"
+      private: false
+      visibility: 'public'
+    body_format: "json"
+    headers:
+      Accept: "application/vnd.github+json"
+      Authorization: "Bearer {{ request_bearer }}"
+      X-GitHub-Api-Version: "{{ githoster_api_version }}"
+    status_code: "{{ range(200, 300) | list }}"
+  register: githoster_create_repository_response

@@ -1,0 +1,11 @@
+name: 'setup'
+description: 'Install dependencies and clone repository'
+runs:
+  using: "composite"
+  steps:
+  - name: Install Ansible, password-store, GnuPG and collections
+    shell: bash
+    run: |
+      sudo apt-get update -y
+      sudo apt-get install -y ansible pass gnupg
+      ansible-galaxy collection install -r ansible/roles/requirements.yml

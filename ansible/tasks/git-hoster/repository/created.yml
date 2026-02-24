@@ -1,0 +1,12 @@
+---
+
+- ansible.builtin.set_fact:
+    page: 1
+    responses:
+      json: []
+
+- ansible.builtin.include_tasks: "{{ playbook_dir }}/tasks/git-hoster/repository/_created.yml"
+
+- ansible.builtin.fail:
+    msg: "{{ repo_name }} was not created"
+  when: responses.json | selectattr('name', '==', repo_name) | list | length == 0

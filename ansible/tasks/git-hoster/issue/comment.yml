@@ -1,0 +1,14 @@
+---
+
+- ansible.builtin.uri:
+    url: "https://{{ githoster_api }}/repos/{{ issue_repo }}/issues/{{ issue_number }}/comments"
+    method: "POST"
+    body:
+      body: "{{ issue_body }}"
+    body_format: "json"
+    headers:
+      Accept: "application/vnd.github+json"
+      Authorization: "Bearer {{ request_bearer }}"
+      X-GitHub-Api-Version: "{{ githoster_api_version }}"
+    status_code: "{{ range(200, 300) | list }}"
+  register: githoster_comment_issue_response

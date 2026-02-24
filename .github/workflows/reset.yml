@@ -1,0 +1,21 @@
+name: reset
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: secrets
+  cancel-in-progress: true
+
+jobs:
+  reset:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: "main"
+        fetch-depth: 0
+        submodules: "true"
+        token: "${{ vars.BOT_GITHUB_TOKEN }}"
+    - uses: ./.github/actions/reset
+      with:
+        gh_token: "${{ vars.BOT_GITHUB_TOKEN }}"
