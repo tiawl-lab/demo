@@ -1,0 +1,66 @@
+name: 'reset'
+description: 'Reset tiawl-lab/demo ansible/secrets sumodule, tiawl-lab/demo history + delete tiawl-lab/secrets and organization variables'
+inputs:
+  gh_token:
+    description: 'A token'
+    required: true
+    type: string
+runs:
+  using: "composite"
+  steps:
+  - shell: bash
+    env: {GH_TOKEN: "${{ inputs.gh_token }}"}
+    run: |
+      set -x
+      git config user.name "GitHub Actions[bot]"
+      git config user.email "bot@noreply.github.com"
+      while git reset --hard HEAD~; do :; done
+      git config --remove-section submodule.ansible/secrets || :
+      git rm -r -f ansible/secrets || :
+      rm -rf .git/modules/ansible/secrets
+      git add -A
+      git commit --amend -m 'init'
+      git push -f
+  - shell: bash
+    env: {GH_TOKEN: "${{ inputs.gh_token }}"}
+    run: |
+      if gh repo list tiawl-lab --json 'name' --jq 'if (any(.name == "secrets") | not) then halt_error(1) end'
+      then
+        gh repo delete tiawl-lab/secrets --yes
+      fi
+  - shell: bash
+    env: {GH_TOKEN: "${{ inputs.gh_token }}"}
+    run: |
+      if gh variable list --org tiawl-lab --json 'name' --jq 'if (any(.name == "GPG_PUBLIC_KEY") | not) then halt_error(1) end'
+      then
+        gh variable delete GPG_PUBLIC_KEY --org tiawl-lab
+      fi
+  - shell: bash
+    env: {GH_TOKEN: "${{ inputs.gh_token }}"}
+    run: |
+      if gh variable list --org tiawl-lab --json 'name' --jq 'if (any(.name == "GPG_PRIVATE_KEY") | not) then halt_error(1) end'
+      then
+        gh variable delete GPG_PRIVATE_KEY --org tiawl-lab
+      fi
+
+  - shell: bash
+    run: sleep 1
+  - name: Check tiawl-lab/secrets submodule was deleted from tiawl-lab repository
+    shell: bash
+    run: |
+      case $'\n'"$(git config --file .gitmodules --name-only --get-regexp path)"$'\n' in
+      ( *$'\nsubmodule.ansible/secrets.path\n'* ) exit 1 ;;
+      ( * ) exit 0 ;;
+      esac
+  - name: Check tiawl-lab/secrets repository was deleted from tiawl-lab organization
+    shell: bash
+    env: {GH_TOKEN: "${{ inputs.gh_token }}"}
+    run: gh repo list tiawl-lab --json 'name' --jq '.[] | if (.name == "secrets") then (halt_error(1)) end'
+  - name: Check gpg public key was deleted from tiawl-lab organization
+    shell: bash
+    env: {GH_TOKEN: "${{ inputs.gh_token }}"}
+    run: gh variable list --org tiawl-lab --json 'name' --jq '.[] | if (.name == "GPG_PUBLIC_KEY") then (halt_error(1)) end'
+  - name: Check gpg private key was deleted from tiawl-lab organization
+    shell: bash
+    env: {GH_TOKEN: "${{ inputs.gh_token }}"}
+    run: gh variable list --org tiawl-lab --json 'name' --jq '.[] | if (.name == "GPG_PRIVATE_KEY") then (halt_error(1)) end'

@@ -1,0 +1,195 @@
+---
+
+- hosts: 127.0.0.1
+  connection: local
+  pre_tasks:
+    - ansible.builtin.include_tasks: tests/secrets/pre/setup.yml
+  roles:
+    - secrets/setup
+  post_tasks:
+    - ansible.builtin.include_tasks: tests/secrets/post/setup.yml
+  tags:
+    - secrets-add
+    - secrets-copy
+    - secrets-delete
+    - secrets-export
+    - secrets-generate
+    - secrets-git
+    - secrets-git-cherrypick
+    - secrets-git-revert
+    - secrets-move
+    - secrets-reencrypt
+    - demo
+  vars:
+    secrets_token: "{{ tldemo_secrets_token }}"
+    secrets_cwd: "{{ tldemo_secrets_cwd }}"
+
+- hosts: 127.0.0.1
+  connection: local
+  roles:
+    - demo
+  tags:
+    - demo
+  vars:
+    secrets_token: "{{ tldemo_secrets_token }}"
+
+- hosts: 127.0.0.1
+  connection: local
+  pre_tasks:
+    - ansible.builtin.include_tasks: tests/secrets/pre/add.yml
+  roles:
+    - secrets/add
+  post_tasks:
+    - ansible.builtin.include_tasks: tests/secrets/post/add.yml
+  tags:
+    - secrets-add
+  vars:
+    secrets_add_path: "{{ tldemo_secrets_add_path }}"
+    secrets_add_password: "{{ tldemo_secrets_add_password }}"
+    secrets_token: "{{ tldemo_secrets_token }}"
+    secrets_cwd: "{{ tldemo_secrets_cwd }}"
+
+- hosts: 127.0.0.1
+  connection: local
+  pre_tasks:
+    - ansible.builtin.include_tasks: tests/secrets/pre/copy.yml
+  roles:
+    - secrets/copy
+  post_tasks:
+    - ansible.builtin.include_tasks: tests/secrets/post/copy.yml
+  tags:
+    - secrets-copy
+  vars:
+    secrets_copy_oldpath: "{{ tldemo_secrets_copy_oldpath }}"
+    secrets_copy_newpath: "{{ tldemo_secrets_copy_newpath }}"
+    secrets_token: "{{ tldemo_secrets_token }}"
+    secrets_cwd: "{{ tldemo_secrets_cwd }}"
+
+- hosts: 127.0.0.1
+  connection: local
+  pre_tasks:
+    - ansible.builtin.include_tasks: tests/secrets/pre/delete.yml
+  roles:
+    - secrets/delete
+  post_tasks:
+    - ansible.builtin.include_tasks: tests/secrets/post/delete.yml
+  tags:
+    - secrets-delete
+  vars:
+    secrets_delete_path: "{{ tldemo_secrets_delete_path }}"
+    secrets_token: "{{ tldemo_secrets_token }}"
+    secrets_cwd: "{{ tldemo_secrets_cwd }}"
+
+- hosts: 127.0.0.1
+  connection: local
+  pre_tasks:
+    - ansible.builtin.include_tasks: tests/secrets/pre/export.yml
+  roles:
+    - secrets/export
+  post_tasks:
+    - ansible.builtin.include_tasks: tests/secrets/post/export.yml
+  tags:
+    - secrets-export
+  vars:
+    secrets_export_confirm: "{{ tldemo_secrets_export_confirm }}"
+    secrets_token: "{{ tldemo_secrets_token }}"
+    secrets_cwd: "{{ tldemo_secrets_cwd }}"
+
+- hosts: 127.0.0.1
+  connection: local
+  pre_tasks:
+    - ansible.builtin.include_tasks: tests/secrets/pre/generate.yml
+  roles:
+    - secrets/generate
+  post_tasks:
+    - ansible.builtin.include_tasks: tests/secrets/post/generate.yml
+  tags:
+    - secrets-generate
+  vars:
+    secrets_generate_path: "{{ tldemo_secrets_generate_path }}"
+    secrets_generate_len: "{{ tldemo_secrets_generate_len }}"
+    secrets_token: "{{ tldemo_secrets_token }}"
+    secrets_cwd: "{{ tldemo_secrets_cwd }}"
+
+- hosts: 127.0.0.1
+  connection: local
+  pre_tasks:
+    - ansible.builtin.include_tasks: tests/secrets/pre/git.yml
+  roles:
+    - secrets/git
+  post_tasks:
+    - ansible.builtin.include_tasks: tests/secrets/post/git.yml
+  tags:
+    - secrets-git
+  vars:
+    secrets_git_cmdargs: "{{ tldemo_secrets_git_cmdargs }}"
+    secrets_git_commitmsg: "{{ tldemo_secrets_git_commitmsg }}"
+    secrets_git_push: "{{ tldemo_secrets_git_push }}"
+    secrets_token: "{{ tldemo_secrets_token }}"
+    secrets_cwd: "{{ tldemo_secrets_cwd }}"
+
+- hosts: 127.0.0.1
+  connection: local
+  pre_tasks:
+    - ansible.builtin.include_tasks: tests/secrets/pre/cherry-pick.yml
+  roles:
+    - secrets/git
+  post_tasks:
+    - ansible.builtin.include_tasks: tests/secrets/post/cherry-pick.yml
+  tags:
+    - secrets-git-cherrypick
+  vars:
+    secrets_git_cmdargs: "cherry-pick --no-commit {{ tldemo_secrets_cherrypick_commit }}"
+    secrets_git_commitmsg: "Cherry pick {{ tldemo_secrets_cherrypick_commit }}"
+    secrets_git_push: true
+    secrets_cherrypick_commit: "{{ tldemo_secrets_cherrypick_commit }}"
+    secrets_token: "{{ tldemo_secrets_token }}"
+    secrets_cwd: "{{ tldemo_secrets_cwd }}"
+
+- hosts: 127.0.0.1
+  connection: local
+  pre_tasks:
+    - ansible.builtin.include_tasks: tests/secrets/pre/revert.yml
+  roles:
+    - secrets/git
+  post_tasks:
+    - ansible.builtin.include_tasks: tests/secrets/post/revert.yml
+  tags:
+    - secrets-git-revert
+  vars:
+    secrets_git_cmdargs: "revert --no-edit --no-commit {{ tldemo_secrets_revert_commit }}"
+    secrets_git_commitmsg: "Revert {{ tldemo_secrets_revert_commit }}"
+    secrets_git_push: true
+    secrets_revert_commit: "{{ tldemo_secrets_revert_commit }}"
+    secrets_token: "{{ tldemo_secrets_token }}"
+    secrets_cwd: "{{ tldemo_secrets_cwd }}"
+
+- hosts: 127.0.0.1
+  connection: local
+  pre_tasks:
+    - ansible.builtin.include_tasks: tests/secrets/pre/move.yml
+  roles:
+    - secrets/move
+  post_tasks:
+    - ansible.builtin.include_tasks: tests/secrets/post/move.yml
+  tags:
+    - secrets-move
+  vars:
+    secrets_move_oldpath: "{{ tldemo_secrets_move_oldpath }}"
+    secrets_move_newpath: "{{ tldemo_secrets_move_newpath }}"
+    secrets_token: "{{ tldemo_secrets_token }}"
+    secrets_cwd: "{{ tldemo_secrets_cwd }}"
+
+- hosts: 127.0.0.1
+  connection: local
+  pre_tasks:
+    - ansible.builtin.include_tasks: tests/secrets/pre/reencrypt.yml
+  roles:
+    - secrets/reencrypt
+  post_tasks:
+    - ansible.builtin.include_tasks: tests/secrets/post/reencrypt.yml
+  tags:
+    - secrets-reencrypt
+  vars:
+    secrets_token: "{{ tldemo_secrets_token }}"
+    secrets_cwd: "{{ tldemo_secrets_cwd }}"

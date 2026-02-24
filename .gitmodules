@@ -1,0 +1,9 @@
+[submodule "ansible/inventory"]
+	path = ansible/inventory
+	url = https://github.com/tiawl-lab/inventory.git
+[submodule "ansible/roles"]
+	path = ansible/roles
+	url = https://github.com/tiawl-lab/roles.git
+[submodule "ansible/secrets"]
+	path = ansible/secrets
+	url = https://github.com/tiawl-lab/secrets.git

@@ -1,0 +1,292 @@
+name: tests
+on:
+  workflow_dispatch:
+    inputs:
+      skip:
+        type: string
+        description: 'comma separated list of set of tests to skip'
+        default: ''
+
+permissions:
+  contents: write
+
+concurrency:
+  group: secrets
+  cancel-in-progress: true
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Cloning
+      uses: actions/checkout@v4
+      with:
+        ref: "main"
+        fetch-depth: 0
+        submodules: "true"
+        token: "${{ vars.BOT_GITHUB_TOKEN }}"
+    - name: Install dependencies
+      uses: ./.github/actions/setup
+    - name: reset 1
+      if: contains(format(',{0},', inputs.skip), ',1,') == false
+      uses: ./.github/actions/reset
+      with:
+        gh_token: "${{ vars.BOT_GITHUB_TOKEN }}"
+    - name: secrets-add SUCCESS 1
+      if: contains(format(',{0},', inputs.skip), ',1,') == false
+      uses: ./.github/actions/run-playbook
+      with:
+        playbook_tag: "secrets-add"
+        playbook_extravar_secrets_add_path: "added/password"
+        playbook_extravar_secrets_add_password: "my_awes0m3_p4ssW0rd"
+        gh_token: "${{ vars.BOT_GITHUB_TOKEN }}"
+    - name: secrets-add SUCCESS 2
+      if: contains(format(',{0},', inputs.skip), ',1,') == false
+      uses: ./.github/actions/run-playbook
+      with:
+        playbook_tag: "secrets-add"
+        playbook_extravar_secrets_add_path: "added/password2"
+        playbook_extravar_secrets_add_password: "my_0TH3r_awes0m3_p4ssW0rd"
+        gh_token: "${{ vars.BOT_GITHUB_TOKEN }}"
+    - name: secrets-add FAILURE
+      if: contains(format(',{0},', inputs.skip), ',1,') == false
+      id: secrets-add-FAILURE
+      continue-on-error: true
+      uses: ./.github/actions/run-playbook
+      with:
+        playbook_tag: "secrets-add"
+        playbook_extravar_secrets_add_path: "added/password2"
+        playbook_extravar_secrets_add_password: "4N0TH3r_awes0m3_p4ssW0rd"
+        gh_token: "${{ vars.BOT_GITHUB_TOKEN }}"
+    - name: check secrets-add FAILURE
+      if: always() && steps.secrets-add-FAILURE.outcome != 'failure' && contains(format(',{0},', inputs.skip), ',1,') == false
+      shell: bash
+      run: exit 1
+    - name: secrets-delete SUCCESS 1
+      if: contains(format(',{0},', inputs.skip), ',1,') == false
+      uses: ./.github/actions/run-playbook
+      with:
+        playbook_tag: "secrets-delete"
+        playbook_extravar_secrets_delete_path: "added/password"
+        gh_token: "${{ vars.BOT_GITHUB_TOKEN }}"
+    - name: secrets-delete SUCCESS 2
+      if: contains(format(',{0},', inputs.skip), ',1,') == false
+      uses: ./.github/actions/run-playbook
+      with:
+        playbook_tag: "secrets-delete"
+        playbook_extravar_secrets_delete_path: "added/password2"
+        gh_token: "${{ vars.BOT_GITHUB_TOKEN }}"
+    - name: secrets-delete FAILURE
+      if: contains(format(',{0},', inputs.skip), ',1,') == false
+      id: secrets-delete-FAILURE
+      continue-on-error: true
+      uses: ./.github/actions/run-playbook
+      with:
+        playbook_tag: "secrets-delete"
+        playbook_extravar_secrets_delete_path: "added/password"
+        gh_token: "${{ vars.BOT_GITHUB_TOKEN }}"
+    - name: check secrets-delete FAILURE
+      if: always() && steps.secrets-delete-FAILURE.outcome != 'failure' && contains(format(',{0},', inputs.skip), ',1,') == false
+      shell: bash
+      run: exit 1
+    - name: secrets-revert SUCCESS 1
+      if: contains(format(',{0},', inputs.skip), ',1,') == false
+      uses: ./.github/actions/run-playbook
+      with:
+        playbook_tag: "secrets-git-revert"
+        playbook_extravar_secrets_revert_commit: "HEAD~0"
+        gh_token: "${{ vars.BOT_GITHUB_TOKEN }}"
+    - name: register commit
+      if: contains(format(',{0},', inputs.skip), ',1,') == false
+      id: commit-secrets-revert-SUCCESS-2
+      working-directory: "${{ github.workspace }}/ansible/secrets"
+      shell: bash
+      run: printf 'sha=%s\n' "$(git rev-parse HEAD~2)" >> "${GITHUB_OUTPUT}"
+    - name: secrets-revert SUCCESS 2
+      if: contains(format(',{0},', inputs.skip), ',1,') == false
+      uses: ./.github/actions/run-playbook
+      with:
+        playbook_tag: "secrets-git-revert"
+        playbook_extravar_secrets_revert_commit: "${{ steps.commit-secrets-revert-SUCCESS-2.outputs.sha }}"
+        gh_token: "${{ vars.BOT_GITHUB_TOKEN }}"
+    - name: secrets-revert FAILURE
+      if: contains(format(',{0},', inputs.skip), ',1,') == false
+      id: secrets-revert-FAILURE
+      continue-on-error: true
+      uses: ./.github/actions/run-playbook
+      with:
+        playbook_tag: "secrets-git-revert"
+        playbook_extravar_secrets_revert_commit: "a-fake-commit"
+        gh_token: "${{ vars.BOT_GITHUB_TOKEN }}"
+    - name: check secrets-revert FAILURE
+      if: always() && steps.secrets-revert-FAILURE.outcome != 'failure' && contains(format(',{0},', inputs.skip), ',1,') == false
+      shell: bash
+      run: exit 1
+    - name: secrets-cherrypick SUCCESS 1
+      if: contains(format(',{0},', inputs.skip), ',1,') == false
+      uses: ./.github/actions/run-playbook
+      with:
+        playbook_tag: "secrets-git-cherrypick"
+        playbook_extravar_secrets_cherrypick_commit: "HEAD~2"
+        gh_token: "${{ vars.BOT_GITHUB_TOKEN }}"
+    - name: register commit
+      if: contains(format(',{0},', inputs.skip), ',1,') == false
+      id: commit-secrets-cherrypick-SUCCESS-2
+      working-directory: "${{ github.workspace }}/ansible/secrets"
+      shell: bash
+      run: printf 'sha=%s\n' "$(git rev-parse HEAD~4)" >> "${GITHUB_OUTPUT}"
+    - name: secrets-cherrypick SUCCESS 2
+      if: contains(format(',{0},', inputs.skip), ',1,') == false
+      uses: ./.github/actions/run-playbook
+      with:
+        playbook_tag: "secrets-git-cherrypick"
+        playbook_extravar_secrets_cherrypick_commit: "${{ steps.commit-secrets-cherrypick-SUCCESS-2.outputs.sha }}"
+        gh_token: "${{ vars.BOT_GITHUB_TOKEN }}"
+    - name: secrets-cherrypick FAILURE
+      if: contains(format(',{0},', inputs.skip), ',1,') == false
+      id: secrets-cherrypick-FAILURE
+      continue-on-error: true
+      uses: ./.github/actions/run-playbook
+      with:
+        playbook_tag: "secrets-git-cherrypick"
+        playbook_extravar_secrets_cherrypick_commit: "a-fake-commit"
+        gh_token: "${{ vars.BOT_GITHUB_TOKEN }}"
+    - name: check secrets-cherrypick FAILURE
+      if: always() && steps.secrets-cherrypick-FAILURE.outcome != 'failure' && contains(format(',{0},', inputs.skip), ',1,') == false
+      shell: bash
+      run: exit 1
+    - name: reset 2
+      if: contains(format(',{0},', inputs.skip), ',2,') == false
+      uses: ./.github/actions/reset
+      with:
+        gh_token: "${{ vars.BOT_GITHUB_TOKEN }}"
+    - name: secrets-generate SUCCESS 1
+      if: contains(format(',{0},', inputs.skip), ',2,') == false
+      uses: ./.github/actions/run-playbook
+      with:
+        playbook_tag: "secrets-generate"
+        playbook_extravar_secrets_generate_path: "generated/password"
+        playbook_extravar_secrets_generate_len: "24"
+        gh_token: "${{ vars.BOT_GITHUB_TOKEN }}"
+    - name: secrets-generate SUCCESS 2
+      if: contains(format(',{0},', inputs.skip), ',2,') == false
+      uses: ./.github/actions/run-playbook
+      with:
+        playbook_tag: "secrets-generate"
+        playbook_extravar_secrets_generate_path: "generated/password2"
+        playbook_extravar_secrets_generate_len: "24"
+        gh_token: "${{ vars.BOT_GITHUB_TOKEN }}"
+    - name: secrets-generate FAILURE
+      if: contains(format(',{0},', inputs.skip), ',2,') == false
+      id: secrets-generate-FAILURE
+      continue-on-error: true
+      uses: ./.github/actions/run-playbook
+      with:
+        playbook_tag: "secrets-generate"
+        playbook_extravar_secrets_generate_path: "generated/password"
+        playbook_extravar_secrets_generate_len: "24"
+        gh_token: "${{ vars.BOT_GITHUB_TOKEN }}"
+    - name: check secrets-generate FAILURE
+      if: always() && steps.secrets-generate-FAILURE.outcome != 'failure' && contains(format(',{0},', inputs.skip), ',2,') == false
+      shell: bash
+      run: exit 1
+    - name: secrets-copy SUCCESS 1
+      if: contains(format(',{0},', inputs.skip), ',2,') == false
+      uses: ./.github/actions/run-playbook
+      with:
+        playbook_tag: "secrets-copy"
+        playbook_extravar_secrets_copy_oldpath: "generated/password"
+        playbook_extravar_secrets_copy_newpath: "generated/copied_password"
+        gh_token: "${{ vars.BOT_GITHUB_TOKEN }}"
+    - name: secrets-copy SUCCESS 2
+      if: contains(format(',{0},', inputs.skip), ',2,') == false
+      uses: ./.github/actions/run-playbook
+      with:
+        playbook_tag: "secrets-copy"
+        playbook_extravar_secrets_copy_oldpath: "generated/password2"
+        playbook_extravar_secrets_copy_newpath: "generated/copied_password2"
+        gh_token: "${{ vars.BOT_GITHUB_TOKEN }}"
+    - name: secrets-copy FAILURE 1
+      if: contains(format(',{0},', inputs.skip), ',2,') == false
+      id: secrets-copy-FAILURE-1
+      continue-on-error: true
+      uses: ./.github/actions/run-playbook
+      with:
+        playbook_tag: "secrets-copy"
+        playbook_extravar_secrets_copy_oldpath: "generated/unknown_password"
+        playbook_extravar_secrets_copy_newpath: "generated/copied_password3"
+        gh_token: "${{ vars.BOT_GITHUB_TOKEN }}"
+    - name: check secrets-copy FAILURE 1
+      if: always() && steps.secrets-copy-FAILURE-1.outcome != 'failure' && contains(format(',{0},', inputs.skip), ',2,') == false
+      shell: bash
+      run: exit 1
+    - name: secrets-copy FAILURE 2
+      if: contains(format(',{0},', inputs.skip), ',2,') == false
+      id: secrets-copy-FAILURE-2
+      continue-on-error: true
+      uses: ./.github/actions/run-playbook
+      with:
+        playbook_tag: "secrets-copy"
+        playbook_extravar_secrets_copy_oldpath: "generated/copied_password"
+        playbook_extravar_secrets_copy_newpath: "generated/password"
+        gh_token: "${{ vars.BOT_GITHUB_TOKEN }}"
+    - name: check secrets-copy FAILURE 2
+      if: always() && steps.secrets-copy-FAILURE-2.outcome != 'failure' && contains(format(',{0},', inputs.skip), ',2,') == false
+      shell: bash
+      run: exit 1
+    - name: secrets-move SUCCESS 1
+      if: contains(format(',{0},', inputs.skip), ',2,') == false
+      uses: ./.github/actions/run-playbook
+      with:
+        playbook_tag: "secrets-move"
+        playbook_extravar_secrets_move_oldpath: "generated/password"
+        playbook_extravar_secrets_move_newpath: "generated/moved_password"
+        gh_token: "${{ vars.BOT_GITHUB_TOKEN }}"
+    - name: secrets-move SUCCESS 2
+      if: contains(format(',{0},', inputs.skip), ',2,') == false
+      uses: ./.github/actions/run-playbook
+      with:
+        playbook_tag: "secrets-move"
+        playbook_extravar_secrets_move_oldpath: "generated/moved_password"
+        playbook_extravar_secrets_move_newpath: "generated/moved_password2"
+        gh_token: "${{ vars.BOT_GITHUB_TOKEN }}"
+    - name: secrets-move FAILURE 1
+      if: contains(format(',{0},', inputs.skip), ',2,') == false
+      id: secrets-move-FAILURE-1
+      continue-on-error: true
+      uses: ./.github/actions/run-playbook
+      with:
+        playbook_tag: "secrets-move"
+        playbook_extravar_secrets_move_oldpath: "generated/unknown_password"
+        playbook_extravar_secrets_move_newpath: "generated/moved_password3"
+        gh_token: "${{ vars.BOT_GITHUB_TOKEN }}"
+    - name: check secrets-move FAILURE 1
+      if: always() && steps.secrets-move-FAILURE-1.outcome != 'failure' && contains(format(',{0},', inputs.skip), ',2,') == false
+      shell: bash
+      run: exit 1
+    - name: secrets-move FAILURE 2
+      if: contains(format(',{0},', inputs.skip), ',2,') == false
+      id: secrets-move-FAILURE-2
+      continue-on-error: true
+      uses: ./.github/actions/run-playbook
+      with:
+        playbook_tag: "secrets-move"
+        playbook_extravar_secrets_move_oldpath: "generated/moved_password"
+        playbook_extravar_secrets_move_newpath: "generated/password"
+        gh_token: "${{ vars.BOT_GITHUB_TOKEN }}"
+    - name: check secrets-move FAILURE 2
+      if: always() && steps.secrets-move-FAILURE-2.outcome != 'failure' && contains(format(',{0},', inputs.skip), ',2,') == false
+      shell: bash
+      run: exit 1
+    - name: secrets-reencrypt SUCCESS 1
+      if: contains(format(',{0},', inputs.skip), ',2,') == false
+      uses: ./.github/actions/run-playbook
+      with:
+        playbook_tag: "secrets-reencrypt"
+        gh_token: "${{ vars.BOT_GITHUB_TOKEN }}"
+    - name: secrets-reencrypt SUCCESS 2
+      if: contains(format(',{0},', inputs.skip), ',2,') == false
+      uses: ./.github/actions/run-playbook
+      with:
+        playbook_tag: "secrets-reencrypt"
+        gh_token: "${{ vars.BOT_GITHUB_TOKEN }}"

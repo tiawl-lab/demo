@@ -1,0 +1,109 @@
+name: 'run-plqybook'
+description: 'Run ansible-playbook'
+inputs:
+  playbook_tag:
+    description: 'Playbook tag'
+    required: true
+    type: string
+  playbook_extravar_secrets_add_path:
+    description: 'Playbook extra variable'
+    type: string
+  playbook_extravar_secrets_add_password:
+    description: 'Playbook extra variable'
+    type: string
+  playbook_extravar_secrets_copy_oldpath:
+    description: 'Playbook extra variable'
+    type: string
+  playbook_extravar_secrets_copy_newpath:
+    description: 'Playbook extra variable'
+    type: string
+  playbook_extravar_secrets_delete_path:
+    description: 'Playbook extra variable'
+    type: string
+  playbook_extravar_secrets_export_confirm:
+    description: 'Playbook extra variable'
+    type: string
+  playbook_extravar_secrets_generate_path:
+    description: 'Playbook extra variable'
+    type: string
+  playbook_extravar_secrets_generate_len:
+    description: 'Playbook extra variable'
+    type: string
+  playbook_extravar_secrets_move_oldpath:
+    description: 'Playbook extra variable'
+    type: string
+  playbook_extravar_secrets_move_newpath:
+    description: 'Playbook extra variable'
+    type: string
+  playbook_extravar_secrets_git_cmdargs:
+    description: 'Playbook extra variable'
+    type: string
+  playbook_extravar_secrets_git_commitmsg:
+    description: 'Playbook extra variable'
+    type: string
+  playbook_extravar_secrets_git_push:
+    description: 'Playbook extra variable'
+    type: string
+  playbook_extravar_secrets_cherrypick_commit:
+    description: 'Playbook extra variable'
+    type: string
+  playbook_extravar_secrets_revert_commit:
+    description: 'Playbook extra variable'
+    type: string
+  gh_token:
+    description: 'A token'
+    required: true
+    type: string
+runs:
+  using: "composite"
+  steps:
+  - name: Run the playbook
+    working-directory: "${{ github.workspace }}"
+    shell: bash
+    env:
+      PY_COLORS: '1'
+      ANSIBLE_FORCE_COLOR: '1'
+      ANSIBLE_HOST_KEY_CHECKING: False
+      ANSIBLE_USER: "${{ github.actor }}"
+      ANSIBLE_CONFIG: "${{ github.workspace }}/ansible.cfg"
+      PASSWORD_STORE_DIR: "${{ github.workspace }}/ansible/secrets"
+      GH_TOKEN: "${{ inputs.gh_token }}"
+      PLAYBOOK_TAGS: "${{ inputs.playbook_tag }}"
+      PLAYBOOK_EXTRAVAR_SECRETS_ADD_PATH: "${{ inputs.playbook_extravar_secrets_add_path }}"
+      PLAYBOOK_EXTRAVAR_SECRETS_ADD_PASSWORD: "${{ inputs.playbook_extravar_secrets_add_password }}"
+      PLAYBOOK_EXTRAVAR_SECRETS_COPY_OLDPATH: "${{ inputs.playbook_extravar_secrets_copy_oldpath }}"
+      PLAYBOOK_EXTRAVAR_SECRETS_COPY_NEWPATH: "${{ inputs.playbook_extravar_secrets_copy_newpath }}"
+      PLAYBOOK_EXTRAVAR_SECRETS_DELETE_PATH: "${{ inputs.playbook_extravar_secrets_delete_path }}"
+      PLAYBOOK_EXTRAVAR_SECRETS_EXPORT_CONFIRM: "${{ inputs.playbook_extravar_secrets_export_confirm }}"
+      PLAYBOOK_EXTRAVAR_SECRETS_GENERATE_PATH: "${{ inputs.playbook_extravar_secrets_generate_path }}"
+      PLAYBOOK_EXTRAVAR_SECRETS_GENERATE_LEN: "${{ inputs.playbook_extravar_secrets_generate_len }}"
+      PLAYBOOK_EXTRAVAR_SECRETS_MOVE_OLDPATH: "${{ inputs.playbook_extravar_secrets_move_oldpath }}"
+      PLAYBOOK_EXTRAVAR_SECRETS_MOVE_NEWPATH: "${{ inputs.playbook_extravar_secrets_move_newpath }}"
+      PLAYBOOK_EXTRAVAR_SECRETS_GIT_CMDARGS: "${{ inputs.playbook_extravar_secrets_git_cmdargs }}"
+      PLAYBOOK_EXTRAVAR_SECRETS_GIT_COMMITMSG: "${{ inputs.playbook_extravar_secrets_git_commitmsg }}"
+      PLAYBOOK_EXTRAVAR_SECRETS_GIT_PUSH: "${{ inputs.playbook_extravar_secrets_git_push }}"
+      PLAYBOOK_EXTRAVAR_SECRETS_CHERRYPICK_COMMIT: "${{ inputs.playbook_extravar_secrets_cherrypick_commit }}"
+      PLAYBOOK_EXTRAVAR_SECRETS_REVERT_COMMIT: "${{ inputs.playbook_extravar_secrets_revert_commit }}"
+    run: |
+      ansible-playbook -vvv \
+                       --connection local \
+                       --user "${ANSIBLE_USER}" \
+                       --tags "${PLAYBOOK_TAGS}" \
+                       --extra-vars "tldemo_secrets_token=${GH_TOKEN}" \
+                       --extra-vars "tldemo_secrets_cwd=${GITHUB_WORKSPACE}" \
+                       --extra-vars "tldemo_secrets_add_path=${PLAYBOOK_EXTRAVAR_SECRETS_ADD_PATH:-}" \
+                       --extra-vars "tldemo_secrets_add_password=${PLAYBOOK_EXTRAVAR_SECRETS_ADD_PASSWORD:-}" \
+                       --extra-vars "tldemo_secrets_copy_oldpath=${PLAYBOOK_EXTRAVAR_SECRETS_COPY_OLDPATH:-}" \
+                       --extra-vars "tldemo_secrets_copy_newpath=${PLAYBOOK_EXTRAVAR_SECRETS_COPY_NEWPATH:-}" \
+                       --extra-vars "tldemo_secrets_delete_path=${PLAYBOOK_EXTRAVAR_SECRETS_DELETE_PATH:-}" \
+                       --extra-vars "tldemo_secrets_export_confirm=${PLAYBOOK_EXTRAVAR_SECRETS_EXPORT_CONFIRM:-}" \
+                       --extra-vars "tldemo_secrets_generate_path=${PLAYBOOK_EXTRAVAR_SECRETS_GENERATE_PATH:-}" \
+                       --extra-vars "tldemo_secrets_generate_len=${PLAYBOOK_EXTRAVAR_SECRETS_GENERATE_LEN:-}" \
+                       --extra-vars "tldemo_secrets_move_oldpath=${PLAYBOOK_EXTRAVAR_SECRETS_MOVE_OLDPATH:-}" \
+                       --extra-vars "tldemo_secrets_move_newpath=${PLAYBOOK_EXTRAVAR_SECRETS_MOVE_NEWPATH:-}" \
+                       --extra-vars "tldemo_secrets_git_cmdargs=${PLAYBOOK_EXTRAVAR_SECRETS_GIT_CMDARGS:-}" \
+                       --extra-vars "tldemo_secrets_git_commitmsg=${PLAYBOOK_EXTRAVAR_SECRETS_GIT_COMMITMSG:-}" \
+                       --extra-vars "tldemo_secrets_git_push=${PLAYBOOK_EXTRAVAR_SECRETS_GIT_PUSH:-}" \
+                       --extra-vars "tldemo_secrets_cherrypick_commit=${PLAYBOOK_EXTRAVAR_SECRETS_CHERRYPICK_COMMIT:-}" \
+                       --extra-vars "tldemo_secrets_revert_commit=${PLAYBOOK_EXTRAVAR_SECRETS_REVERT_COMMIT:-}" \
+                       ansible/main.yml
